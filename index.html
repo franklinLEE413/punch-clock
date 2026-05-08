@@ -1,0 +1,502 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#f7f3ef" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="下班时间" />
+  <link rel="manifest" href="./manifest.json" />
+  <title>下班时间</title>
+  <style>
+    :root {
+      --bg: #f7f3ef;
+      --card: rgba(255,255,255,.72);
+      --text: #232323;
+      --muted: #7c746c;
+      --line: rgba(30,30,30,.08);
+      --primary: #2f2a26;
+      --primaryText: #fffaf4;
+      --danger: #9a4a3f;
+      --shadow: 0 18px 50px rgba(42, 34, 28, .10);
+      --radius: 28px;
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "PingFang SC", "Microsoft YaHei", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(224, 199, 174, .45), transparent 34%),
+        radial-gradient(circle at bottom right, rgba(178, 199, 193, .35), transparent 38%),
+        var(--bg);
+    }
+
+    body {
+      min-height: 100dvh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: max(22px, env(safe-area-inset-top)) 18px max(22px, env(safe-area-inset-bottom));
+    }
+
+    main {
+      width: min(430px, 100%);
+    }
+
+    .card {
+      width: 100%;
+      padding: 28px 24px 22px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--card);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+    }
+
+    .top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+
+    .label {
+      font-size: 13px;
+      color: var(--muted);
+      letter-spacing: .06em;
+    }
+
+    .today {
+      font-size: 15px;
+      font-weight: 650;
+      color: var(--text);
+      white-space: nowrap;
+    }
+
+    .hero {
+      margin: 8px 0 22px;
+    }
+
+    .hero-title {
+      margin: 0 0 8px;
+      font-size: 17px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .off-time {
+      margin: 0;
+      font-variant-numeric: tabular-nums;
+      font-size: clamp(54px, 16vw, 72px);
+      line-height: .98;
+      letter-spacing: -0.055em;
+      font-weight: 760;
+    }
+
+    .status {
+      min-height: 26px;
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin: 20px 0 18px;
+    }
+
+    .tile {
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 14px 14px 13px;
+      background: rgba(255,255,255,.48);
+    }
+
+    .tile span {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .tile strong {
+      display: block;
+      font-variant-numeric: tabular-nums;
+      font-size: 22px;
+      letter-spacing: -0.02em;
+    }
+
+    .progress-wrap {
+      height: 8px;
+      overflow: hidden;
+      border-radius: 99px;
+      background: rgba(35, 35, 35, .08);
+      margin: 2px 0 20px;
+    }
+
+    .progress {
+      width: 0%;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, rgba(47,42,38,.65), rgba(47,42,38,.95));
+      transition: width .35s ease;
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    button {
+      width: 100%;
+      border: 0;
+      border-radius: 20px;
+      min-height: 56px;
+      padding: 0 18px;
+      font-size: 17px;
+      font-weight: 720;
+      font-family: inherit;
+      cursor: pointer;
+    }
+
+    .primary {
+      color: var(--primaryText);
+      background: var(--primary);
+      box-shadow: 0 10px 24px rgba(35, 35, 35, .16);
+    }
+
+    .secondary-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .secondary {
+      color: var(--text);
+      background: rgba(255,255,255,.56);
+      border: 1px solid var(--line);
+      box-shadow: none;
+      font-size: 15px;
+      font-weight: 680;
+      min-height: 48px;
+    }
+
+    .danger {
+      color: var(--danger);
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: calc(18px + env(safe-area-inset-bottom));
+      transform: translateX(-50%) translateY(18px);
+      max-width: min(330px, calc(100vw - 36px));
+      padding: 12px 15px;
+      border-radius: 999px;
+      background: rgba(35,35,35,.88);
+      color: white;
+      font-size: 14px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .22s ease, transform .22s ease;
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      text-align: center;
+      z-index: 10;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #171615;
+        --card: rgba(33, 31, 29, .74);
+        --text: #f3eee8;
+        --muted: #afa69d;
+        --line: rgba(255,255,255,.10);
+        --primary: #f3eee8;
+        --primaryText: #171615;
+        --danger: #e18b7d;
+        --shadow: 0 18px 50px rgba(0,0,0,.28);
+      }
+
+      html, body {
+        background:
+          radial-gradient(circle at top left, rgba(115, 87, 64, .36), transparent 34%),
+          radial-gradient(circle at bottom right, rgba(80, 109, 103, .28), transparent 38%),
+          var(--bg);
+      }
+
+      .tile, .secondary {
+        background: rgba(255,255,255,.06);
+      }
+
+      .progress-wrap {
+        background: rgba(255,255,255,.10);
+      }
+
+      .progress {
+        background: linear-gradient(90deg, rgba(243,238,232,.62), rgba(243,238,232,.95));
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="card" aria-label="打卡记录">
+      <div class="top">
+        <div>
+          <div class="label">TODAY</div>
+          <div class="today" id="todayText">--</div>
+        </div>
+        <div class="label" id="nowText">--:--</div>
+      </div>
+
+      <div class="hero">
+        <p class="hero-title" id="heroTitle">预计下班</p>
+        <h1 class="off-time" id="offTime">--:--</h1>
+        <div class="status" id="statusText">点击下方按钮记录今天的打卡时间</div>
+      </div>
+
+      <div class="grid">
+        <div class="tile">
+          <span>打卡时间</span>
+          <strong id="punchTime">--:--</strong>
+        </div>
+        <div class="tile">
+          <span>工时</span>
+          <strong>8.5h</strong>
+        </div>
+      </div>
+
+      <div class="progress-wrap" aria-hidden="true">
+        <div class="progress" id="progressBar"></div>
+      </div>
+
+      <div class="actions">
+        <button class="primary" id="punchBtn">打卡</button>
+        <div class="secondary-row">
+          <button class="secondary" id="copyBtn">复制时间</button>
+          <button class="secondary danger" id="resetBtn">重置</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    (() => {
+      const WORK_MINUTES = 8.5 * 60;
+      const STORAGE_KEY = "simplePunchClock.records.v1";
+      const $ = (id) => document.getElementById(id);
+
+      const todayText = $("todayText");
+      const nowText = $("nowText");
+      const offTimeEl = $("offTime");
+      const statusText = $("statusText");
+      const punchTimeEl = $("punchTime");
+      const punchBtn = $("punchBtn");
+      const copyBtn = $("copyBtn");
+      const resetBtn = $("resetBtn");
+      const progressBar = $("progressBar");
+      const heroTitle = $("heroTitle");
+      const toast = $("toast");
+
+      let reminderTimer = null;
+      let toastTimer = null;
+
+      const pad = (n) => String(n).padStart(2, "0");
+
+      function getTodayKey(date = new Date()) {
+        return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+      }
+
+      function formatTime(date) {
+        return `${pad(date.getHours())}:${pad(date.getMinutes())}`;
+      }
+
+      function formatDate(date) {
+        return `${date.getMonth() + 1}月${date.getDate()}日 周${"日一二三四五六"[date.getDay()]}`;
+      }
+
+      function formatRemain(ms) {
+        const totalMinutes = Math.max(0, Math.ceil(ms / 60000));
+        const h = Math.floor(totalMinutes / 60);
+        const m = totalMinutes % 60;
+        if (h <= 0 && m <= 0) return "可以下班了";
+        if (h <= 0) return `还有 ${m} 分钟`;
+        if (m === 0) return `还有 ${h} 小时`;
+        return `还有 ${h} 小时 ${m} 分钟`;
+      }
+
+      function loadRecords() {
+        try {
+          return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+        } catch {
+          return {};
+        }
+      }
+
+      function saveRecords(records) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+      }
+
+      function getTodayRecord() {
+        return loadRecords()[getTodayKey()] || null;
+      }
+
+      function getOffDate(punchDate) {
+        return new Date(punchDate.getTime() + WORK_MINUTES * 60000);
+      }
+
+      function showToast(message) {
+        clearTimeout(toastTimer);
+        toast.textContent = message;
+        toast.classList.add("show");
+        toastTimer = setTimeout(() => toast.classList.remove("show"), 2200);
+      }
+
+      function notifyOffWork(offDate) {
+        const title = "到下班时间了";
+        const body = `今天预计 ${formatTime(offDate)} 下班。`;
+
+        if ("Notification" in window && Notification.permission === "granted") {
+          new Notification(title, { body });
+        }
+
+        if ("vibrate" in navigator) {
+          navigator.vibrate([120, 60, 120]);
+        }
+
+        showToast(`${title}，${body}`);
+      }
+
+      async function requestNotificationPermission() {
+        if (!("Notification" in window)) return;
+        if (Notification.permission === "default") {
+          try { await Notification.requestPermission(); } catch {}
+        }
+      }
+
+      function scheduleReminder(offDate) {
+        clearTimeout(reminderTimer);
+        const delay = offDate.getTime() - Date.now();
+        if (delay > 0 && delay <= 2147483647) {
+          reminderTimer = setTimeout(() => notifyOffWork(offDate), delay);
+        }
+      }
+
+      function render() {
+        const now = new Date();
+        const record = getTodayRecord();
+
+        todayText.textContent = formatDate(now);
+        nowText.textContent = formatTime(now);
+
+        if (!record) {
+          heroTitle.textContent = "预计下班";
+          offTimeEl.textContent = "--:--";
+          punchTimeEl.textContent = "--:--";
+          statusText.textContent = "点击下方按钮记录今天的打卡时间";
+          progressBar.style.width = "0%";
+          punchBtn.textContent = "打卡";
+          copyBtn.disabled = true;
+          resetBtn.disabled = true;
+          clearTimeout(reminderTimer);
+          return;
+        }
+
+        const punchDate = new Date(record.punchAt);
+        const offDate = getOffDate(punchDate);
+        const total = offDate.getTime() - punchDate.getTime();
+        const passed = now.getTime() - punchDate.getTime();
+        const percent = Math.max(0, Math.min(100, (passed / total) * 100));
+
+        heroTitle.textContent = now >= offDate ? "可以下班" : "预计下班";
+        offTimeEl.textContent = formatTime(offDate);
+        punchTimeEl.textContent = formatTime(punchDate);
+        progressBar.style.width = `${percent}%`;
+        punchBtn.textContent = "今日已打卡";
+        copyBtn.disabled = false;
+        resetBtn.disabled = false;
+
+        if (now >= offDate) {
+          statusText.textContent = `今天 ${formatTime(punchDate)} 打卡，已满 8.5 小时`;
+        } else {
+          statusText.textContent = `${formatRemain(offDate - now)} · 今天 ${formatTime(punchDate)} 打卡`;
+        }
+
+        scheduleReminder(offDate);
+      }
+
+      punchBtn.addEventListener("click", async () => {
+        const records = loadRecords();
+        const key = getTodayKey();
+
+        if (records[key]) {
+          showToast("今天已经记录过了");
+          return;
+        }
+
+        const now = new Date();
+        records[key] = { punchAt: now.toISOString() };
+        saveRecords(records);
+        await requestNotificationPermission();
+        render();
+
+        const offDate = getOffDate(now);
+        showToast(`已记录，预计 ${formatTime(offDate)} 下班`);
+      });
+
+      copyBtn.addEventListener("click", async () => {
+        const record = getTodayRecord();
+        if (!record) return;
+
+        const punchDate = new Date(record.punchAt);
+        const offDate = getOffDate(punchDate);
+        const text = `今天 ${formatTime(punchDate)} 打卡，预计 ${formatTime(offDate)} 下班。`;
+
+        try {
+          await navigator.clipboard.writeText(text);
+          showToast("已复制");
+        } catch {
+          showToast(text);
+        }
+      });
+
+      resetBtn.addEventListener("click", () => {
+        const records = loadRecords();
+        const key = getTodayKey();
+
+        if (!records[key]) return;
+        const ok = confirm("重置今天的打卡记录？");
+        if (!ok) return;
+
+        delete records[key];
+        saveRecords(records);
+        render();
+        showToast("已重置");
+      });
+
+      render();
+      setInterval(render, 15000);
+      document.addEventListener("visibilitychange", render);
+    })();
+  </script>
+</body>
+</html>
