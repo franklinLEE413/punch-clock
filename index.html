@@ -8,17 +8,19 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="下班时间" />
   <link rel="manifest" href="./manifest.json" />
+  <link rel="apple-touch-icon" href="./icon.svg" />
   <title>下班时间</title>
   <style>
     :root {
       --bg: #f7f3ef;
-      --card: rgba(255,255,255,.72);
+      --card: rgba(255,255,255,.74);
       --text: #232323;
       --muted: #7c746c;
       --line: rgba(30,30,30,.08);
       --primary: #2f2a26;
       --primaryText: #fffaf4;
       --danger: #9a4a3f;
+      --ok: #4f6b5d;
       --shadow: 0 18px 50px rgba(42, 34, 28, .10);
       --radius: 28px;
     }
@@ -44,9 +46,7 @@
       padding: max(22px, env(safe-area-inset-top)) 18px max(22px, env(safe-area-inset-bottom));
     }
 
-    main {
-      width: min(430px, 100%);
-    }
+    main { width: min(430px, 100%); }
 
     .card {
       width: 100%;
@@ -71,6 +71,7 @@
       font-size: 13px;
       color: var(--muted);
       letter-spacing: .06em;
+      text-transform: uppercase;
     }
 
     .today {
@@ -80,9 +81,7 @@
       white-space: nowrap;
     }
 
-    .hero {
-      margin: 8px 0 22px;
-    }
+    .hero { margin: 8px 0 22px; }
 
     .hero-title {
       margin: 0 0 8px;
@@ -158,6 +157,8 @@
       gap: 10px;
     }
 
+    button, input { font-family: inherit; }
+
     button {
       width: 100%;
       border: 0;
@@ -166,9 +167,10 @@
       padding: 0 18px;
       font-size: 17px;
       font-weight: 720;
-      font-family: inherit;
       cursor: pointer;
     }
+
+    button:disabled { opacity: .45; cursor: not-allowed; }
 
     .primary {
       color: var(--primaryText);
@@ -192,8 +194,109 @@
       min-height: 48px;
     }
 
-    .danger {
-      color: var(--danger);
+    .danger { color: var(--danger); }
+    .ok { color: var(--ok); }
+
+    .sheet-mask {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+      background: rgba(0,0,0,.18);
+      z-index: 20;
+    }
+
+    .sheet-mask.show { display: flex; }
+
+    .sheet {
+      width: min(430px, calc(100vw - 22px));
+      max-height: calc(100dvh - 36px);
+      overflow: auto;
+      margin-bottom: max(10px, env(safe-area-inset-bottom));
+      padding: 18px;
+      border-radius: 28px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.86);
+      box-shadow: 0 22px 60px rgba(0,0,0,.18);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+    }
+
+    .sheet-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .sheet-title {
+      font-size: 18px;
+      font-weight: 760;
+      letter-spacing: -0.01em;
+    }
+
+    .close {
+      width: auto;
+      min-height: 36px;
+      padding: 0 13px;
+      border-radius: 999px;
+      font-size: 14px;
+      background: rgba(35,35,35,.08);
+      color: var(--text);
+      box-shadow: none;
+    }
+
+    .form-block {
+      padding: 14px;
+      border-radius: 22px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.48);
+      margin-top: 10px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .form-row:last-child { margin-bottom: 0; }
+
+    .form-label {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    input[type="time"] {
+      width: 116px;
+      min-height: 42px;
+      padding: 0 10px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.70);
+      color: var(--text);
+      font-size: 18px;
+      font-weight: 680;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .mini-btn {
+      min-height: 46px;
+      margin-top: 8px;
+      font-size: 15px;
+      border-radius: 16px;
+    }
+
+    .hint {
+      margin: 10px 2px 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
     }
 
     .toast {
@@ -201,7 +304,7 @@
       left: 50%;
       bottom: calc(18px + env(safe-area-inset-bottom));
       transform: translateX(-50%) translateY(18px);
-      max-width: min(330px, calc(100vw - 36px));
+      max-width: min(350px, calc(100vw - 36px));
       padding: 12px 15px;
       border-radius: 999px;
       background: rgba(35,35,35,.88);
@@ -213,13 +316,10 @@
       backdrop-filter: blur(18px);
       -webkit-backdrop-filter: blur(18px);
       text-align: center;
-      z-index: 10;
+      z-index: 30;
     }
 
-    .toast.show {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
     @media (prefers-color-scheme: dark) {
       :root {
@@ -231,6 +331,7 @@
         --primary: #f3eee8;
         --primaryText: #171615;
         --danger: #e18b7d;
+        --ok: #9fc4ad;
         --shadow: 0 18px 50px rgba(0,0,0,.28);
       }
 
@@ -241,17 +342,12 @@
           var(--bg);
       }
 
-      .tile, .secondary {
-        background: rgba(255,255,255,.06);
-      }
-
-      .progress-wrap {
-        background: rgba(255,255,255,.10);
-      }
-
-      .progress {
-        background: linear-gradient(90deg, rgba(243,238,232,.62), rgba(243,238,232,.95));
-      }
+      .tile, .secondary, .form-block { background: rgba(255,255,255,.06); }
+      .progress-wrap { background: rgba(255,255,255,.10); }
+      .progress { background: linear-gradient(90deg, rgba(243,238,232,.62), rgba(243,238,232,.95)); }
+      .sheet { background: rgba(33,31,29,.88); }
+      input[type="time"] { background: rgba(255,255,255,.08); }
+      .close { background: rgba(255,255,255,.10); }
     }
   </style>
 </head>
@@ -290,19 +386,53 @@
       <div class="actions">
         <button class="primary" id="punchBtn">打卡</button>
         <div class="secondary-row">
-          <button class="secondary" id="copyBtn">复制时间</button>
-          <button class="secondary danger" id="resetBtn">重置</button>
+          <button class="secondary" id="editBtn">调整</button>
+          <button class="secondary ok" id="remindBtn">提醒</button>
         </div>
       </div>
     </section>
   </main>
+
+  <div class="sheet-mask" id="sheetMask" role="dialog" aria-modal="true" aria-label="调整打卡时间">
+    <section class="sheet">
+      <div class="sheet-head">
+        <div class="sheet-title">调整</div>
+        <button class="close" id="closeBtn">关闭</button>
+      </div>
+
+      <div class="form-block">
+        <div class="form-row">
+          <div><div class="form-label">修改 / 补录上班打卡</div></div>
+          <input id="manualPunchInput" type="time" value="08:50" />
+        </div>
+        <button class="primary mini-btn" id="saveManualPunchBtn">保存打卡时间</button>
+      </div>
+
+      <div class="form-block">
+        <div class="form-row">
+          <div><div class="form-label">按目标下班时间反推</div></div>
+          <input id="targetOffInput" type="time" value="17:20" />
+        </div>
+        <button class="secondary mini-btn" id="reverseBtn">反推并填入打卡时间</button>
+        <div class="hint" id="reverseHint">例如 17:20 下班，需要 08:50 打卡。</div>
+      </div>
+
+      <div class="form-block">
+        <button class="secondary mini-btn" id="copyBtn">复制今日时间</button>
+        <button class="secondary mini-btn" id="calendarBtn">生成日历提醒</button>
+        <button class="secondary mini-btn" id="notifyBtn">开启网页通知</button>
+        <button class="secondary danger mini-btn" id="resetBtn">重置今天</button>
+        <div class="hint">网页通知适合页面保持打开时使用；日历提醒会生成 .ics 文件，可尝试导入系统日历。</div>
+      </div>
+    </section>
+  </div>
 
   <div class="toast" id="toast"></div>
 
   <script>
     (() => {
       const WORK_MINUTES = 8.5 * 60;
-      const STORAGE_KEY = "simplePunchClock.records.v1";
+      const STORAGE_KEY = "simplePunchClock.records.v2";
       const $ = (id) => document.getElementById(id);
 
       const todayText = $("todayText");
@@ -311,14 +441,27 @@
       const statusText = $("statusText");
       const punchTimeEl = $("punchTime");
       const punchBtn = $("punchBtn");
-      const copyBtn = $("copyBtn");
-      const resetBtn = $("resetBtn");
+      const editBtn = $("editBtn");
+      const remindBtn = $("remindBtn");
       const progressBar = $("progressBar");
       const heroTitle = $("heroTitle");
       const toast = $("toast");
 
+      const sheetMask = $("sheetMask");
+      const closeBtn = $("closeBtn");
+      const manualPunchInput = $("manualPunchInput");
+      const targetOffInput = $("targetOffInput");
+      const saveManualPunchBtn = $("saveManualPunchBtn");
+      const reverseBtn = $("reverseBtn");
+      const reverseHint = $("reverseHint");
+      const copyBtn = $("copyBtn");
+      const calendarBtn = $("calendarBtn");
+      const notifyBtn = $("notifyBtn");
+      const resetBtn = $("resetBtn");
+
       let reminderTimer = null;
       let toastTimer = null;
+      let lastNotifiedKey = null;
 
       const pad = (n) => String(n).padStart(2, "0");
 
@@ -334,6 +477,20 @@
         return `${date.getMonth() + 1}月${date.getDate()}日 周${"日一二三四五六"[date.getDay()]}`;
       }
 
+      function parseTimeToDate(timeValue, baseDate = new Date()) {
+        const [h, m] = timeValue.split(":").map(Number);
+        const d = new Date(baseDate);
+        d.setHours(h, m, 0, 0);
+        return d;
+      }
+
+      function addMinutes(date, minutes) {
+        return new Date(date.getTime() + minutes * 60000);
+      }
+
+      function getOffDate(punchDate) { return addMinutes(punchDate, WORK_MINUTES); }
+      function getPunchDateFromOff(offDate) { return addMinutes(offDate, -WORK_MINUTES); }
+
       function formatRemain(ms) {
         const totalMinutes = Math.max(0, Math.ceil(ms / 60000));
         const h = Math.floor(totalMinutes / 60);
@@ -346,23 +503,18 @@
 
       function loadRecords() {
         try {
-          return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
-        } catch {
-          return {};
-        }
+          const oldRecords = JSON.parse(localStorage.getItem("simplePunchClock.records.v1")) || {};
+          const records = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+          if (Object.keys(oldRecords).length && !Object.keys(records).length) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(oldRecords));
+            return oldRecords;
+          }
+          return records;
+        } catch { return {}; }
       }
 
-      function saveRecords(records) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
-      }
-
-      function getTodayRecord() {
-        return loadRecords()[getTodayKey()] || null;
-      }
-
-      function getOffDate(punchDate) {
-        return new Date(punchDate.getTime() + WORK_MINUTES * 60000);
-      }
+      function saveRecords(records) { localStorage.setItem(STORAGE_KEY, JSON.stringify(records)); }
+      function getTodayRecord() { return loadRecords()[getTodayKey()] || null; }
 
       function showToast(message) {
         clearTimeout(toastTimer);
@@ -372,25 +524,44 @@
       }
 
       function notifyOffWork(offDate) {
+        const todayKey = getTodayKey(offDate);
+        if (lastNotifiedKey === todayKey) return;
+        lastNotifiedKey = todayKey;
+
         const title = "到下班时间了";
         const body = `今天预计 ${formatTime(offDate)} 下班。`;
 
         if ("Notification" in window && Notification.permission === "granted") {
-          new Notification(title, { body });
+          try { new Notification(title, { body }); } catch {}
         }
-
         if ("vibrate" in navigator) {
-          navigator.vibrate([120, 60, 120]);
+          try { navigator.vibrate([120, 60, 120]); } catch {}
         }
-
         showToast(`${title}，${body}`);
       }
 
       async function requestNotificationPermission() {
-        if (!("Notification" in window)) return;
-        if (Notification.permission === "default") {
-          try { await Notification.requestPermission(); } catch {}
+        if (!("Notification" in window)) {
+          showToast("当前浏览器不支持网页通知");
+          return false;
         }
+        if (Notification.permission === "granted") {
+          showToast("网页通知已开启");
+          return true;
+        }
+        if (Notification.permission === "denied") {
+          showToast("通知已被系统拒绝，请到设置里开启");
+          return false;
+        }
+        try {
+          const result = await Notification.requestPermission();
+          if (result === "granted") {
+            showToast("网页通知已开启");
+            return true;
+          }
+        } catch {}
+        showToast("未开启网页通知");
+        return false;
       }
 
       function scheduleReminder(offDate) {
@@ -399,6 +570,94 @@
         if (delay > 0 && delay <= 2147483647) {
           reminderTimer = setTimeout(() => notifyOffWork(offDate), delay);
         }
+      }
+
+      function ensureSheetValues() {
+        const record = getTodayRecord();
+        if (record) {
+          const punchDate = new Date(record.punchAt);
+          const offDate = getOffDate(punchDate);
+          manualPunchInput.value = formatTime(punchDate);
+          targetOffInput.value = formatTime(offDate);
+          reverseHint.textContent = `当前 ${formatTime(punchDate)} 打卡，预计 ${formatTime(offDate)} 下班。`;
+        } else {
+          const now = new Date();
+          manualPunchInput.value = formatTime(now);
+          const offDate = getOffDate(now);
+          targetOffInput.value = formatTime(offDate);
+          reverseHint.textContent = `例如 ${formatTime(offDate)} 下班，需要 ${formatTime(now)} 打卡。`;
+        }
+      }
+
+      function savePunchAt(date, source = "manual") {
+        const records = loadRecords();
+        const key = getTodayKey(date);
+        records[key] = { punchAt: date.toISOString(), source, updatedAt: new Date().toISOString() };
+        saveRecords(records);
+        lastNotifiedKey = null;
+        render();
+        const offDate = getOffDate(date);
+        showToast(`已记录，预计 ${formatTime(offDate)} 下班`);
+      }
+
+      function getCurrentText() {
+        const record = getTodayRecord();
+        if (!record) return "";
+        const punchDate = new Date(record.punchAt);
+        const offDate = getOffDate(punchDate);
+        return `今天 ${formatTime(punchDate)} 打卡，预计 ${formatTime(offDate)} 下班。`;
+      }
+
+      function toIcsDate(date) {
+        return `${date.getFullYear()}${pad(date.getMonth()+1)}${pad(date.getDate())}T${pad(date.getHours())}${pad(date.getMinutes())}${pad(date.getSeconds())}`;
+      }
+
+      function escapeIcsText(text) {
+        return String(text).replace(/\\/g, "\\\\").replace(/\n/g, "\\n").replace(/,/g, "\\,").replace(/;/g, "\\;");
+      }
+
+      function createCalendarReminder() {
+        const record = getTodayRecord();
+        if (!record) { showToast("请先打卡或补录时间"); return; }
+
+        const punchDate = new Date(record.punchAt);
+        const offDate = getOffDate(punchDate);
+        const endDate = addMinutes(offDate, 5);
+        const uid = `offwork-${getTodayKey(offDate)}-${Date.now()}@local`;
+        const desc = `今天 ${formatTime(punchDate)} 打卡，预计 ${formatTime(offDate)} 下班。`;
+
+        const ics = [
+          "BEGIN:VCALENDAR",
+          "VERSION:2.0",
+          "PRODID:-//Local Punch Clock//CN",
+          "CALSCALE:GREGORIAN",
+          "METHOD:PUBLISH",
+          "BEGIN:VEVENT",
+          `UID:${uid}`,
+          `DTSTAMP:${toIcsDate(new Date())}`,
+          `DTSTART:${toIcsDate(offDate)}`,
+          `DTEND:${toIcsDate(endDate)}`,
+          "SUMMARY:下班时间",
+          `DESCRIPTION:${escapeIcsText(desc)}`,
+          "BEGIN:VALARM",
+          "TRIGGER:PT0M",
+          "ACTION:DISPLAY",
+          `DESCRIPTION:${escapeIcsText(desc)}`,
+          "END:VALARM",
+          "END:VEVENT",
+          "END:VCALENDAR"
+        ].join("\r\n");
+
+        const blob = new Blob([ics], { type: "text/calendar;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `下班提醒-${getTodayKey(offDate)}.ics`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        showToast("已生成日历提醒文件");
       }
 
       function render() {
@@ -415,7 +674,9 @@
           statusText.textContent = "点击下方按钮记录今天的打卡时间";
           progressBar.style.width = "0%";
           punchBtn.textContent = "打卡";
+          remindBtn.disabled = true;
           copyBtn.disabled = true;
+          calendarBtn.disabled = true;
           resetBtn.disabled = true;
           clearTimeout(reminderTimer);
           return;
@@ -431,8 +692,10 @@
         offTimeEl.textContent = formatTime(offDate);
         punchTimeEl.textContent = formatTime(punchDate);
         progressBar.style.width = `${percent}%`;
-        punchBtn.textContent = "今日已打卡";
+        punchBtn.textContent = "重新打卡";
+        remindBtn.disabled = false;
         copyBtn.disabled = false;
+        calendarBtn.disabled = false;
         resetBtn.disabled = false;
 
         if (now >= offDate) {
@@ -440,58 +703,75 @@
         } else {
           statusText.textContent = `${formatRemain(offDate - now)} · 今天 ${formatTime(punchDate)} 打卡`;
         }
-
         scheduleReminder(offDate);
       }
 
       punchBtn.addEventListener("click", async () => {
-        const records = loadRecords();
-        const key = getTodayKey();
-
-        if (records[key]) {
-          showToast("今天已经记录过了");
-          return;
+        const record = getTodayRecord();
+        if (record) {
+          const ok = confirm("用当前时间覆盖今天的打卡记录？");
+          if (!ok) return;
         }
-
         const now = new Date();
-        records[key] = { punchAt: now.toISOString() };
-        saveRecords(records);
+        savePunchAt(now, "button");
         await requestNotificationPermission();
-        render();
-
-        const offDate = getOffDate(now);
-        showToast(`已记录，预计 ${formatTime(offDate)} 下班`);
       });
 
+      editBtn.addEventListener("click", () => { ensureSheetValues(); sheetMask.classList.add("show"); });
+      closeBtn.addEventListener("click", () => sheetMask.classList.remove("show"));
+      sheetMask.addEventListener("click", (e) => { if (e.target === sheetMask) sheetMask.classList.remove("show"); });
+
+      saveManualPunchBtn.addEventListener("click", () => {
+        if (!manualPunchInput.value) { showToast("请填写打卡时间"); return; }
+        const punchDate = parseTimeToDate(manualPunchInput.value, new Date());
+        savePunchAt(punchDate, "manual");
+        ensureSheetValues();
+      });
+
+      reverseBtn.addEventListener("click", () => {
+        if (!targetOffInput.value) { showToast("请填写目标下班时间"); return; }
+        const offDate = parseTimeToDate(targetOffInput.value, new Date());
+        const punchDate = getPunchDateFromOff(offDate);
+        manualPunchInput.value = formatTime(punchDate);
+        reverseHint.textContent = `${formatTime(offDate)} 下班，需要 ${formatTime(punchDate)} 打卡。`;
+        savePunchAt(punchDate, "reverse");
+      });
+
+      targetOffInput.addEventListener("input", () => {
+        if (!targetOffInput.value) return;
+        const offDate = parseTimeToDate(targetOffInput.value, new Date());
+        const punchDate = getPunchDateFromOff(offDate);
+        reverseHint.textContent = `${formatTime(offDate)} 下班，需要 ${formatTime(punchDate)} 打卡。`;
+      });
+
+      remindBtn.addEventListener("click", createCalendarReminder);
+      calendarBtn.addEventListener("click", createCalendarReminder);
+      notifyBtn.addEventListener("click", requestNotificationPermission);
+
       copyBtn.addEventListener("click", async () => {
-        const record = getTodayRecord();
-        if (!record) return;
-
-        const punchDate = new Date(record.punchAt);
-        const offDate = getOffDate(punchDate);
-        const text = `今天 ${formatTime(punchDate)} 打卡，预计 ${formatTime(offDate)} 下班。`;
-
-        try {
-          await navigator.clipboard.writeText(text);
-          showToast("已复制");
-        } catch {
-          showToast(text);
-        }
+        const text = getCurrentText();
+        if (!text) return;
+        try { await navigator.clipboard.writeText(text); showToast("已复制"); }
+        catch { showToast(text); }
       });
 
       resetBtn.addEventListener("click", () => {
         const records = loadRecords();
         const key = getTodayKey();
-
         if (!records[key]) return;
         const ok = confirm("重置今天的打卡记录？");
         if (!ok) return;
-
         delete records[key];
         saveRecords(records);
+        lastNotifiedKey = null;
         render();
+        ensureSheetValues();
         showToast("已重置");
       });
+
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => { navigator.serviceWorker.register("./sw.js").catch(() => {}); });
+      }
 
       render();
       setInterval(render, 15000);
