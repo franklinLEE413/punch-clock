@@ -1,782 +1,91 @@
 <!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#f7f3ef" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="apple-mobile-web-app-title" content="下班时间" />
-  <link rel="manifest" href="./manifest.json" />
-  <link rel="apple-touch-icon" href="./icon.svg" />
-  <title>下班时间</title>
-  <style>
-    :root {
-      --bg: #f7f3ef;
-      --card: rgba(255,255,255,.74);
-      --text: #232323;
-      --muted: #7c746c;
-      --line: rgba(30,30,30,.08);
-      --primary: #2f2a26;
-      --primaryText: #fffaf4;
-      --danger: #9a4a3f;
-      --ok: #4f6b5d;
-      --shadow: 0 18px 50px rgba(42, 34, 28, .10);
-      --radius: 28px;
-    }
-
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-
-    html, body {
-      height: 100%;
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "PingFang SC", "Microsoft YaHei", sans-serif;
-      color: var(--text);
-      background:
-        radial-gradient(circle at top left, rgba(224, 199, 174, .45), transparent 34%),
-        radial-gradient(circle at bottom right, rgba(178, 199, 193, .35), transparent 38%),
-        var(--bg);
-    }
-
-    body {
-      min-height: 100dvh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: max(22px, env(safe-area-inset-top)) 18px max(22px, env(safe-area-inset-bottom));
-    }
-
-    main { width: min(430px, 100%); }
-
-    .card {
-      width: 100%;
-      padding: 28px 24px 22px;
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      background: var(--card);
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(22px);
-      -webkit-backdrop-filter: blur(22px);
-    }
-
-    .top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 22px;
-    }
-
-    .label {
-      font-size: 13px;
-      color: var(--muted);
-      letter-spacing: .06em;
-      text-transform: uppercase;
-    }
-
-    .today {
-      font-size: 15px;
-      font-weight: 650;
-      color: var(--text);
-      white-space: nowrap;
-    }
-
-    .hero { margin: 8px 0 22px; }
-
-    .hero-title {
-      margin: 0 0 8px;
-      font-size: 17px;
-      color: var(--muted);
-      font-weight: 600;
-    }
-
-    .off-time {
-      margin: 0;
-      font-variant-numeric: tabular-nums;
-      font-size: clamp(54px, 16vw, 72px);
-      line-height: .98;
-      letter-spacing: -0.055em;
-      font-weight: 760;
-    }
-
-    .status {
-      min-height: 26px;
-      margin-top: 14px;
-      color: var(--muted);
-      font-size: 15px;
-      line-height: 1.6;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin: 20px 0 18px;
-    }
-
-    .tile {
-      border: 1px solid var(--line);
-      border-radius: 20px;
-      padding: 14px 14px 13px;
-      background: rgba(255,255,255,.48);
-    }
-
-    .tile span {
-      display: block;
-      margin-bottom: 6px;
-      font-size: 12px;
-      color: var(--muted);
-    }
-
-    .tile strong {
-      display: block;
-      font-variant-numeric: tabular-nums;
-      font-size: 22px;
-      letter-spacing: -0.02em;
-    }
-
-    .progress-wrap {
-      height: 8px;
-      overflow: hidden;
-      border-radius: 99px;
-      background: rgba(35, 35, 35, .08);
-      margin: 2px 0 20px;
-    }
-
-    .progress {
-      width: 0%;
-      height: 100%;
-      border-radius: inherit;
-      background: linear-gradient(90deg, rgba(47,42,38,.65), rgba(47,42,38,.95));
-      transition: width .35s ease;
-    }
-
-    .actions {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 10px;
-    }
-
-    button, input { font-family: inherit; }
-
-    button {
-      width: 100%;
-      border: 0;
-      border-radius: 20px;
-      min-height: 56px;
-      padding: 0 18px;
-      font-size: 17px;
-      font-weight: 720;
-      cursor: pointer;
-    }
-
-    button:disabled { opacity: .45; cursor: not-allowed; }
-
-    .primary {
-      color: var(--primaryText);
-      background: var(--primary);
-      box-shadow: 0 10px 24px rgba(35, 35, 35, .16);
-    }
-
-    .secondary-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-
-    .secondary {
-      color: var(--text);
-      background: rgba(255,255,255,.56);
-      border: 1px solid var(--line);
-      box-shadow: none;
-      font-size: 15px;
-      font-weight: 680;
-      min-height: 48px;
-    }
-
-    .danger { color: var(--danger); }
-    .ok { color: var(--ok); }
-
-    .sheet-mask {
-      position: fixed;
-      inset: 0;
-      display: none;
-      align-items: flex-end;
-      justify-content: center;
-      background: rgba(0,0,0,.18);
-      z-index: 20;
-    }
-
-    .sheet-mask.show { display: flex; }
-
-    .sheet {
-      width: min(430px, calc(100vw - 22px));
-      max-height: calc(100dvh - 36px);
-      overflow: auto;
-      margin-bottom: max(10px, env(safe-area-inset-bottom));
-      padding: 18px;
-      border-radius: 28px;
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,.86);
-      box-shadow: 0 22px 60px rgba(0,0,0,.18);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-    }
-
-    .sheet-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 12px;
-    }
-
-    .sheet-title {
-      font-size: 18px;
-      font-weight: 760;
-      letter-spacing: -0.01em;
-    }
-
-    .close {
-      width: auto;
-      min-height: 36px;
-      padding: 0 13px;
-      border-radius: 999px;
-      font-size: 14px;
-      background: rgba(35,35,35,.08);
-      color: var(--text);
-      box-shadow: none;
-    }
-
-    .form-block {
-      padding: 14px;
-      border-radius: 22px;
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,.48);
-      margin-top: 10px;
-    }
-
-    .form-row {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 10px;
-    }
-
-    .form-row:last-child { margin-bottom: 0; }
-
-    .form-label {
-      font-size: 13px;
-      color: var(--muted);
-      line-height: 1.4;
-    }
-
-    input[type="time"] {
-      width: 116px;
-      min-height: 42px;
-      padding: 0 10px;
-      border-radius: 14px;
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,.70);
-      color: var(--text);
-      font-size: 18px;
-      font-weight: 680;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .mini-btn {
-      min-height: 46px;
-      margin-top: 8px;
-      font-size: 15px;
-      border-radius: 16px;
-    }
-
-    .hint {
-      margin: 10px 2px 0;
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.6;
-    }
-
-    .toast {
-      position: fixed;
-      left: 50%;
-      bottom: calc(18px + env(safe-area-inset-bottom));
-      transform: translateX(-50%) translateY(18px);
-      max-width: min(350px, calc(100vw - 36px));
-      padding: 12px 15px;
-      border-radius: 999px;
-      background: rgba(35,35,35,.88);
-      color: white;
-      font-size: 14px;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity .22s ease, transform .22s ease;
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-      text-align: center;
-      z-index: 30;
-    }
-
-    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --bg: #171615;
-        --card: rgba(33, 31, 29, .74);
-        --text: #f3eee8;
-        --muted: #afa69d;
-        --line: rgba(255,255,255,.10);
-        --primary: #f3eee8;
-        --primaryText: #171615;
-        --danger: #e18b7d;
-        --ok: #9fc4ad;
-        --shadow: 0 18px 50px rgba(0,0,0,.28);
-      }
-
-      html, body {
-        background:
-          radial-gradient(circle at top left, rgba(115, 87, 64, .36), transparent 34%),
-          radial-gradient(circle at bottom right, rgba(80, 109, 103, .28), transparent 38%),
-          var(--bg);
-      }
-
-      .tile, .secondary, .form-block { background: rgba(255,255,255,.06); }
-      .progress-wrap { background: rgba(255,255,255,.10); }
-      .progress { background: linear-gradient(90deg, rgba(243,238,232,.62), rgba(243,238,232,.95)); }
-      .sheet { background: rgba(33,31,29,.88); }
-      input[type="time"] { background: rgba(255,255,255,.08); }
-      .close { background: rgba(255,255,255,.10); }
-    }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f7f3ef">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="下班时间">
+<link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" href="./icon.svg">
+<title>下班时间</title>
+<style>
+:root{--bg:#f7f3ef;--card:rgba(255,255,255,.76);--text:#232323;--muted:#7c746c;--line:rgba(30,30,30,.09);--primary:#2f2a26;--primaryText:#fffaf4;--ok:#4f6b5d;--warn:#947247;--danger:#9a4a3f}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{height:100%;margin:0;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","PingFang SC","Microsoft YaHei",sans-serif;color:var(--text);background:radial-gradient(circle at top left,rgba(224,199,174,.45),transparent 35%),radial-gradient(circle at bottom right,rgba(178,199,193,.36),transparent 38%),var(--bg)}
+body{min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:max(22px,env(safe-area-inset-top)) 18px max(22px,env(safe-area-inset-bottom))}
+main{width:min(430px,100%)}.card{padding:28px 24px 22px;border:1px solid var(--line);border-radius:28px;background:var(--card);box-shadow:0 18px 50px rgba(42,34,28,.10);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px)}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px}.label{font-size:13px;color:var(--muted);letter-spacing:.06em}.today{font-size:15px;font-weight:650}.hero{margin:8px 0 22px}.hero-title{margin:0 0 8px;font-size:17px;color:var(--muted);font-weight:600}.off-time{margin:0;font-variant-numeric:tabular-nums;font-size:clamp(54px,16vw,72px);line-height:.98;letter-spacing:-.055em;font-weight:760}.status{min-height:26px;margin-top:14px;color:var(--muted);font-size:15px;line-height:1.6}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:20px 0 18px}.tile,.panel,.block{border:1px solid var(--line);background:rgba(255,255,255,.48)}.tile{border-radius:20px;padding:14px}.tile span{display:block;margin-bottom:6px;font-size:12px;color:var(--muted)}.tile strong{display:block;font-variant-numeric:tabular-nums;font-size:22px;letter-spacing:-.02em}
+.progress-wrap{height:8px;overflow:hidden;border-radius:99px;background:rgba(35,35,35,.08);margin:2px 0 18px}.progress{width:0;height:100%;border-radius:inherit;background:linear-gradient(90deg,rgba(47,42,38,.65),rgba(47,42,38,.95));transition:width .35s ease}
+.panel{border-radius:20px;padding:13px 14px;margin-bottom:18px}.panel-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:9px}.panel-title{font-size:12px;color:var(--muted)}.panel-value{font-size:13px;font-weight:720;font-variant-numeric:tabular-nums}.spark{width:100%;height:54px;display:block;overflow:visible}.spark path{fill:none;stroke:currentColor;stroke-width:3.5;stroke-linecap:round;stroke-linejoin:round;opacity:.82}.spark circle{fill:currentColor;opacity:.9}.empty{color:var(--muted);font-size:13px;line-height:1.6}
+.actions{display:grid;gap:10px}.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}button,input{font-family:inherit}button{width:100%;border:0;border-radius:20px;min-height:56px;padding:0 18px;font-size:17px;font-weight:720;cursor:pointer}button:disabled{opacity:.48;cursor:not-allowed;box-shadow:none}.primary{color:var(--primaryText);background:var(--primary);box-shadow:0 10px 24px rgba(35,35,35,.16)}.locked{color:var(--muted);background:rgba(255,255,255,.42);border:1px solid var(--line);box-shadow:none}.secondary{color:var(--text);background:rgba(255,255,255,.56);border:1px solid var(--line);box-shadow:none;font-size:15px;font-weight:680;min-height:48px}.ok{color:var(--ok)}.danger{color:var(--danger)}
+.mask{position:fixed;inset:0;display:none;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.18);z-index:20}.mask.show{display:flex}.sheet{width:min(430px,calc(100vw - 22px));max-height:calc(100dvh - 36px);overflow:auto;margin-bottom:max(10px,env(safe-area-inset-bottom));padding:18px;border-radius:28px;border:1px solid var(--line);background:rgba(255,255,255,.88);box-shadow:0 22px 60px rgba(0,0,0,.18);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px)}
+.sheet-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}.sheet-title{font-size:18px;font-weight:760}.close{width:auto;min-height:36px;padding:0 13px;border-radius:999px;font-size:14px;background:rgba(35,35,35,.08);color:var(--text);box-shadow:none}.block{padding:14px;border-radius:22px;margin-top:10px}.form-row{display:grid;grid-template-columns:1fr auto;align-items:center;gap:12px;margin-bottom:10px}.form-label{font-size:13px;color:var(--muted);line-height:1.4}input[type=time]{width:116px;min-height:42px;padding:0 10px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.7);color:var(--text);font-size:18px;font-weight:680;font-variant-numeric:tabular-nums}.mini{min-height:46px;margin-top:8px;font-size:15px;border-radius:16px}.hint{margin:10px 2px 0;color:var(--muted);font-size:13px;line-height:1.6}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}.stat{border-radius:16px;background:rgba(255,255,255,.4);padding:10px 9px}.stat span{display:block;color:var(--muted);font-size:11px;margin-bottom:5px}.stat strong{font-size:16px;font-variant-numeric:tabular-nums}.trend-list{display:grid;gap:7px}.trend-row{display:grid;grid-template-columns:42px 52px 1fr 36px;align-items:center;gap:8px;min-height:24px;color:var(--muted);font-size:12px}.trend-time{color:var(--text);font-size:13px;font-weight:720;font-variant-numeric:tabular-nums}.bar-bg{height:8px;border-radius:999px;background:rgba(35,35,35,.08);overflow:hidden}.bar{height:100%;border-radius:inherit;background:currentColor;opacity:.78}.tag{text-align:right;font-size:11px}.tag.ok{color:var(--ok)}.tag.warn{color:var(--warn)}.tag.muted{color:var(--muted)}
+.toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(18px);max-width:min(350px,calc(100vw - 36px));padding:12px 15px;border-radius:999px;background:rgba(35,35,35,.88);color:white;font-size:14px;opacity:0;pointer-events:none;transition:.22s;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);text-align:center;z-index:30}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@media(prefers-color-scheme:dark){:root{--bg:#171615;--card:rgba(33,31,29,.74);--text:#f3eee8;--muted:#afa69d;--line:rgba(255,255,255,.10);--primary:#f3eee8;--primaryText:#171615;--ok:#9fc4ad;--warn:#d9ba82;--danger:#e18b7d}html,body{background:radial-gradient(circle at top left,rgba(115,87,64,.36),transparent 34%),radial-gradient(circle at bottom right,rgba(80,109,103,.28),transparent 38%),var(--bg)}.tile,.secondary,.block,.panel{background:rgba(255,255,255,.06)}.locked{background:rgba(255,255,255,.06)}.progress-wrap,.bar-bg{background:rgba(255,255,255,.10)}.progress{background:linear-gradient(90deg,rgba(243,238,232,.62),rgba(243,238,232,.95))}.sheet{background:rgba(33,31,29,.88)}input[type=time]{background:rgba(255,255,255,.08)}.close,.stat{background:rgba(255,255,255,.10)}}
+</style>
 </head>
 <body>
-  <main>
-    <section class="card" aria-label="打卡记录">
-      <div class="top">
-        <div>
-          <div class="label">TODAY</div>
-          <div class="today" id="todayText">--</div>
-        </div>
-        <div class="label" id="nowText">--:--</div>
-      </div>
-
-      <div class="hero">
-        <p class="hero-title" id="heroTitle">预计下班</p>
-        <h1 class="off-time" id="offTime">--:--</h1>
-        <div class="status" id="statusText">点击下方按钮记录今天的打卡时间</div>
-      </div>
-
-      <div class="grid">
-        <div class="tile">
-          <span>打卡时间</span>
-          <strong id="punchTime">--:--</strong>
-        </div>
-        <div class="tile">
-          <span>工时</span>
-          <strong>8.5h</strong>
-        </div>
-      </div>
-
-      <div class="progress-wrap" aria-hidden="true">
-        <div class="progress" id="progressBar"></div>
-      </div>
-
-      <div class="actions">
-        <button class="primary" id="punchBtn">打卡</button>
-        <div class="secondary-row">
-          <button class="secondary" id="editBtn">调整</button>
-          <button class="secondary ok" id="remindBtn">提醒</button>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <div class="sheet-mask" id="sheetMask" role="dialog" aria-modal="true" aria-label="调整打卡时间">
-    <section class="sheet">
-      <div class="sheet-head">
-        <div class="sheet-title">调整</div>
-        <button class="close" id="closeBtn">关闭</button>
-      </div>
-
-      <div class="form-block">
-        <div class="form-row">
-          <div><div class="form-label">修改 / 补录上班打卡</div></div>
-          <input id="manualPunchInput" type="time" value="08:50" />
-        </div>
-        <button class="primary mini-btn" id="saveManualPunchBtn">保存打卡时间</button>
-      </div>
-
-      <div class="form-block">
-        <div class="form-row">
-          <div><div class="form-label">按目标下班时间反推</div></div>
-          <input id="targetOffInput" type="time" value="17:20" />
-        </div>
-        <button class="secondary mini-btn" id="reverseBtn">反推并填入打卡时间</button>
-        <div class="hint" id="reverseHint">例如 17:20 下班，需要 08:50 打卡。</div>
-      </div>
-
-      <div class="form-block">
-        <button class="secondary mini-btn" id="copyBtn">复制今日时间</button>
-        <button class="secondary mini-btn" id="calendarBtn">生成日历提醒</button>
-        <button class="secondary mini-btn" id="notifyBtn">开启网页通知</button>
-        <button class="secondary danger mini-btn" id="resetBtn">重置今天</button>
-        <div class="hint">网页通知适合页面保持打开时使用；日历提醒会生成 .ics 文件，可尝试导入系统日历。</div>
-      </div>
-    </section>
-  </div>
-
-  <div class="toast" id="toast"></div>
-
-  <script>
-    (() => {
-      const WORK_MINUTES = 8.5 * 60;
-      const STORAGE_KEY = "simplePunchClock.records.v2";
-      const $ = (id) => document.getElementById(id);
-
-      const todayText = $("todayText");
-      const nowText = $("nowText");
-      const offTimeEl = $("offTime");
-      const statusText = $("statusText");
-      const punchTimeEl = $("punchTime");
-      const punchBtn = $("punchBtn");
-      const editBtn = $("editBtn");
-      const remindBtn = $("remindBtn");
-      const progressBar = $("progressBar");
-      const heroTitle = $("heroTitle");
-      const toast = $("toast");
-
-      const sheetMask = $("sheetMask");
-      const closeBtn = $("closeBtn");
-      const manualPunchInput = $("manualPunchInput");
-      const targetOffInput = $("targetOffInput");
-      const saveManualPunchBtn = $("saveManualPunchBtn");
-      const reverseBtn = $("reverseBtn");
-      const reverseHint = $("reverseHint");
-      const copyBtn = $("copyBtn");
-      const calendarBtn = $("calendarBtn");
-      const notifyBtn = $("notifyBtn");
-      const resetBtn = $("resetBtn");
-
-      let reminderTimer = null;
-      let toastTimer = null;
-      let lastNotifiedKey = null;
-
-      const pad = (n) => String(n).padStart(2, "0");
-
-      function getTodayKey(date = new Date()) {
-        return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
-      }
-
-      function formatTime(date) {
-        return `${pad(date.getHours())}:${pad(date.getMinutes())}`;
-      }
-
-      function formatDate(date) {
-        return `${date.getMonth() + 1}月${date.getDate()}日 周${"日一二三四五六"[date.getDay()]}`;
-      }
-
-      function parseTimeToDate(timeValue, baseDate = new Date()) {
-        const [h, m] = timeValue.split(":").map(Number);
-        const d = new Date(baseDate);
-        d.setHours(h, m, 0, 0);
-        return d;
-      }
-
-      function addMinutes(date, minutes) {
-        return new Date(date.getTime() + minutes * 60000);
-      }
-
-      function getOffDate(punchDate) { return addMinutes(punchDate, WORK_MINUTES); }
-      function getPunchDateFromOff(offDate) { return addMinutes(offDate, -WORK_MINUTES); }
-
-      function formatRemain(ms) {
-        const totalMinutes = Math.max(0, Math.ceil(ms / 60000));
-        const h = Math.floor(totalMinutes / 60);
-        const m = totalMinutes % 60;
-        if (h <= 0 && m <= 0) return "可以下班了";
-        if (h <= 0) return `还有 ${m} 分钟`;
-        if (m === 0) return `还有 ${h} 小时`;
-        return `还有 ${h} 小时 ${m} 分钟`;
-      }
-
-      function loadRecords() {
-        try {
-          const oldRecords = JSON.parse(localStorage.getItem("simplePunchClock.records.v1")) || {};
-          const records = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
-          if (Object.keys(oldRecords).length && !Object.keys(records).length) {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(oldRecords));
-            return oldRecords;
-          }
-          return records;
-        } catch { return {}; }
-      }
-
-      function saveRecords(records) { localStorage.setItem(STORAGE_KEY, JSON.stringify(records)); }
-      function getTodayRecord() { return loadRecords()[getTodayKey()] || null; }
-
-      function showToast(message) {
-        clearTimeout(toastTimer);
-        toast.textContent = message;
-        toast.classList.add("show");
-        toastTimer = setTimeout(() => toast.classList.remove("show"), 2200);
-      }
-
-      function notifyOffWork(offDate) {
-        const todayKey = getTodayKey(offDate);
-        if (lastNotifiedKey === todayKey) return;
-        lastNotifiedKey = todayKey;
-
-        const title = "到下班时间了";
-        const body = `今天预计 ${formatTime(offDate)} 下班。`;
-
-        if ("Notification" in window && Notification.permission === "granted") {
-          try { new Notification(title, { body }); } catch {}
-        }
-        if ("vibrate" in navigator) {
-          try { navigator.vibrate([120, 60, 120]); } catch {}
-        }
-        showToast(`${title}，${body}`);
-      }
-
-      async function requestNotificationPermission() {
-        if (!("Notification" in window)) {
-          showToast("当前浏览器不支持网页通知");
-          return false;
-        }
-        if (Notification.permission === "granted") {
-          showToast("网页通知已开启");
-          return true;
-        }
-        if (Notification.permission === "denied") {
-          showToast("通知已被系统拒绝，请到设置里开启");
-          return false;
-        }
-        try {
-          const result = await Notification.requestPermission();
-          if (result === "granted") {
-            showToast("网页通知已开启");
-            return true;
-          }
-        } catch {}
-        showToast("未开启网页通知");
-        return false;
-      }
-
-      function scheduleReminder(offDate) {
-        clearTimeout(reminderTimer);
-        const delay = offDate.getTime() - Date.now();
-        if (delay > 0 && delay <= 2147483647) {
-          reminderTimer = setTimeout(() => notifyOffWork(offDate), delay);
-        }
-      }
-
-      function ensureSheetValues() {
-        const record = getTodayRecord();
-        if (record) {
-          const punchDate = new Date(record.punchAt);
-          const offDate = getOffDate(punchDate);
-          manualPunchInput.value = formatTime(punchDate);
-          targetOffInput.value = formatTime(offDate);
-          reverseHint.textContent = `当前 ${formatTime(punchDate)} 打卡，预计 ${formatTime(offDate)} 下班。`;
-        } else {
-          const now = new Date();
-          manualPunchInput.value = formatTime(now);
-          const offDate = getOffDate(now);
-          targetOffInput.value = formatTime(offDate);
-          reverseHint.textContent = `例如 ${formatTime(offDate)} 下班，需要 ${formatTime(now)} 打卡。`;
-        }
-      }
-
-      function savePunchAt(date, source = "manual") {
-        const records = loadRecords();
-        const key = getTodayKey(date);
-        records[key] = { punchAt: date.toISOString(), source, updatedAt: new Date().toISOString() };
-        saveRecords(records);
-        lastNotifiedKey = null;
-        render();
-        const offDate = getOffDate(date);
-        showToast(`已记录，预计 ${formatTime(offDate)} 下班`);
-      }
-
-      function getCurrentText() {
-        const record = getTodayRecord();
-        if (!record) return "";
-        const punchDate = new Date(record.punchAt);
-        const offDate = getOffDate(punchDate);
-        return `今天 ${formatTime(punchDate)} 打卡，预计 ${formatTime(offDate)} 下班。`;
-      }
-
-      function toIcsDate(date) {
-        return `${date.getFullYear()}${pad(date.getMonth()+1)}${pad(date.getDate())}T${pad(date.getHours())}${pad(date.getMinutes())}${pad(date.getSeconds())}`;
-      }
-
-      function escapeIcsText(text) {
-        return String(text).replace(/\\/g, "\\\\").replace(/\n/g, "\\n").replace(/,/g, "\\,").replace(/;/g, "\\;");
-      }
-
-      function createCalendarReminder() {
-        const record = getTodayRecord();
-        if (!record) { showToast("请先打卡或补录时间"); return; }
-
-        const punchDate = new Date(record.punchAt);
-        const offDate = getOffDate(punchDate);
-        const endDate = addMinutes(offDate, 5);
-        const uid = `offwork-${getTodayKey(offDate)}-${Date.now()}@local`;
-        const desc = `今天 ${formatTime(punchDate)} 打卡，预计 ${formatTime(offDate)} 下班。`;
-
-        const ics = [
-          "BEGIN:VCALENDAR",
-          "VERSION:2.0",
-          "PRODID:-//Local Punch Clock//CN",
-          "CALSCALE:GREGORIAN",
-          "METHOD:PUBLISH",
-          "BEGIN:VEVENT",
-          `UID:${uid}`,
-          `DTSTAMP:${toIcsDate(new Date())}`,
-          `DTSTART:${toIcsDate(offDate)}`,
-          `DTEND:${toIcsDate(endDate)}`,
-          "SUMMARY:下班时间",
-          `DESCRIPTION:${escapeIcsText(desc)}`,
-          "BEGIN:VALARM",
-          "TRIGGER:PT0M",
-          "ACTION:DISPLAY",
-          `DESCRIPTION:${escapeIcsText(desc)}`,
-          "END:VALARM",
-          "END:VEVENT",
-          "END:VCALENDAR"
-        ].join("\r\n");
-
-        const blob = new Blob([ics], { type: "text/calendar;charset=utf-8" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `下班提醒-${getTodayKey(offDate)}.ics`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        URL.revokeObjectURL(url);
-        showToast("已生成日历提醒文件");
-      }
-
-      function render() {
-        const now = new Date();
-        const record = getTodayRecord();
-
-        todayText.textContent = formatDate(now);
-        nowText.textContent = formatTime(now);
-
-        if (!record) {
-          heroTitle.textContent = "预计下班";
-          offTimeEl.textContent = "--:--";
-          punchTimeEl.textContent = "--:--";
-          statusText.textContent = "点击下方按钮记录今天的打卡时间";
-          progressBar.style.width = "0%";
-          punchBtn.textContent = "打卡";
-          remindBtn.disabled = true;
-          copyBtn.disabled = true;
-          calendarBtn.disabled = true;
-          resetBtn.disabled = true;
-          clearTimeout(reminderTimer);
-          return;
-        }
-
-        const punchDate = new Date(record.punchAt);
-        const offDate = getOffDate(punchDate);
-        const total = offDate.getTime() - punchDate.getTime();
-        const passed = now.getTime() - punchDate.getTime();
-        const percent = Math.max(0, Math.min(100, (passed / total) * 100));
-
-        heroTitle.textContent = now >= offDate ? "可以下班" : "预计下班";
-        offTimeEl.textContent = formatTime(offDate);
-        punchTimeEl.textContent = formatTime(punchDate);
-        progressBar.style.width = `${percent}%`;
-        punchBtn.textContent = "重新打卡";
-        remindBtn.disabled = false;
-        copyBtn.disabled = false;
-        calendarBtn.disabled = false;
-        resetBtn.disabled = false;
-
-        if (now >= offDate) {
-          statusText.textContent = `今天 ${formatTime(punchDate)} 打卡，已满 8.5 小时`;
-        } else {
-          statusText.textContent = `${formatRemain(offDate - now)} · 今天 ${formatTime(punchDate)} 打卡`;
-        }
-        scheduleReminder(offDate);
-      }
-
-      punchBtn.addEventListener("click", async () => {
-        const record = getTodayRecord();
-        if (record) {
-          const ok = confirm("用当前时间覆盖今天的打卡记录？");
-          if (!ok) return;
-        }
-        const now = new Date();
-        savePunchAt(now, "button");
-        await requestNotificationPermission();
-      });
-
-      editBtn.addEventListener("click", () => { ensureSheetValues(); sheetMask.classList.add("show"); });
-      closeBtn.addEventListener("click", () => sheetMask.classList.remove("show"));
-      sheetMask.addEventListener("click", (e) => { if (e.target === sheetMask) sheetMask.classList.remove("show"); });
-
-      saveManualPunchBtn.addEventListener("click", () => {
-        if (!manualPunchInput.value) { showToast("请填写打卡时间"); return; }
-        const punchDate = parseTimeToDate(manualPunchInput.value, new Date());
-        savePunchAt(punchDate, "manual");
-        ensureSheetValues();
-      });
-
-      reverseBtn.addEventListener("click", () => {
-        if (!targetOffInput.value) { showToast("请填写目标下班时间"); return; }
-        const offDate = parseTimeToDate(targetOffInput.value, new Date());
-        const punchDate = getPunchDateFromOff(offDate);
-        manualPunchInput.value = formatTime(punchDate);
-        reverseHint.textContent = `${formatTime(offDate)} 下班，需要 ${formatTime(punchDate)} 打卡。`;
-        savePunchAt(punchDate, "reverse");
-      });
-
-      targetOffInput.addEventListener("input", () => {
-        if (!targetOffInput.value) return;
-        const offDate = parseTimeToDate(targetOffInput.value, new Date());
-        const punchDate = getPunchDateFromOff(offDate);
-        reverseHint.textContent = `${formatTime(offDate)} 下班，需要 ${formatTime(punchDate)} 打卡。`;
-      });
-
-      remindBtn.addEventListener("click", createCalendarReminder);
-      calendarBtn.addEventListener("click", createCalendarReminder);
-      notifyBtn.addEventListener("click", requestNotificationPermission);
-
-      copyBtn.addEventListener("click", async () => {
-        const text = getCurrentText();
-        if (!text) return;
-        try { await navigator.clipboard.writeText(text); showToast("已复制"); }
-        catch { showToast(text); }
-      });
-
-      resetBtn.addEventListener("click", () => {
-        const records = loadRecords();
-        const key = getTodayKey();
-        if (!records[key]) return;
-        const ok = confirm("重置今天的打卡记录？");
-        if (!ok) return;
-        delete records[key];
-        saveRecords(records);
-        lastNotifiedKey = null;
-        render();
-        ensureSheetValues();
-        showToast("已重置");
-      });
-
-      if ("serviceWorker" in navigator) {
-        window.addEventListener("load", () => { navigator.serviceWorker.register("./sw.js").catch(() => {}); });
-      }
-
-      render();
-      setInterval(render, 15000);
-      document.addEventListener("visibilitychange", render);
-    })();
-  </script>
+<main><section class="card">
+  <div class="top"><div><div class="label">TODAY</div><div class="today" id="todayText">--</div></div><div class="label" id="nowText">--:--</div></div>
+  <div class="hero"><p class="hero-title" id="heroTitle">预计下班</p><h1 class="off-time" id="offTime">--:--</h1><div class="status" id="statusText">点击下方按钮记录今天的打卡时间</div></div>
+  <div class="grid"><div class="tile"><span>打卡时间</span><strong id="punchTime">--:--</strong></div><div class="tile"><span>工时</span><strong>8.5h</strong></div></div>
+  <div class="progress-wrap"><div class="progress" id="progressBar"></div></div>
+  <section class="panel"><div class="panel-head"><div class="panel-title">近7日趋势</div><div class="panel-value" id="trendValue">暂无记录</div></div><svg class="spark" id="spark" viewBox="0 0 360 54" preserveAspectRatio="none"></svg><div class="empty" id="sparkEmpty">暂无足够记录</div></section>
+  <div class="actions"><button class="primary" id="punchBtn">打卡</button><div class="row2"><button class="secondary" id="editBtn">调整</button><button class="secondary ok" id="remindBtn">提醒</button></div></div>
+</section></main>
+<div class="mask" id="mask"><section class="sheet">
+  <div class="sheet-head"><div class="sheet-title">调整</div><button class="close" id="closeBtn">关闭</button></div>
+  <div class="block"><div class="form-row"><div class="form-label">修改 / 补录上班打卡</div><input id="manualInput" type="time" value="08:50"></div><button class="primary mini" id="saveBtn">保存打卡时间</button><div class="hint" id="manualHint">打卡后主按钮会锁定；如需修改，只能从这里调整。</div></div>
+  <div class="block"><div class="form-row"><div class="form-label">按目标下班时间反推</div><input id="offInput" type="time" value="17:20"></div><button class="secondary mini" id="reverseBtn">反推并填入打卡时间</button><div class="hint" id="reverseHint">例如 17:20 下班，需要 08:50 打卡。</div></div>
+  <div class="block"><div class="sheet-title" style="font-size:16px;margin-bottom:10px">近7日趋势</div><div class="stats"><div class="stat"><span>平均</span><strong id="avgStat">--:--</strong></div><div class="stat"><span>最早</span><strong id="earlyStat">--:--</strong></div><div class="stat"><span>最晚</span><strong id="lateStat">--:--</strong></div></div><div class="trend-list" id="trendList"></div><div class="hint" id="trendHint">只统计本机浏览器保存过的记录。</div></div>
+  <div class="block"><button class="secondary mini" id="copyBtn">复制今日时间</button><button class="secondary mini" id="calendarBtn">生成日历提醒</button><button class="secondary mini" id="notifyBtn">开启网页通知</button><button class="secondary danger mini" id="resetBtn">重置今天</button><div class="hint">网页通知适合页面保持打开时使用；日历提醒会生成 .ics 文件，可尝试导入系统日历。</div></div>
+</section></div>
+<div class="toast" id="toast"></div>
+<script>
+(()=>{const WORK=510,EARLY=510,LATE=570,KEY="simplePunchClock.records.v3",OLDS=["simplePunchClock.records.v2","simplePunchClock.records.v1"],$=id=>document.getElementById(id),pad=n=>String(n).padStart(2,"0");
+const E={today:$("todayText"),now:$("nowText"),hero:$("heroTitle"),off:$("offTime"),status:$("statusText"),punch:$("punchTime"),btn:$("punchBtn"),edit:$("editBtn"),remind:$("remindBtn"),prog:$("progressBar"),value:$("trendValue"),spark:$("spark"),empty:$("sparkEmpty"),mask:$("mask"),close:$("closeBtn"),manual:$("manualInput"),offInput:$("offInput"),save:$("saveBtn"),reverse:$("reverseBtn"),manualHint:$("manualHint"),reverseHint:$("reverseHint"),copy:$("copyBtn"),cal:$("calendarBtn"),notify:$("notifyBtn"),reset:$("resetBtn"),list:$("trendList"),avg:$("avgStat"),early:$("earlyStat"),late:$("lateStat"),trendHint:$("trendHint"),toast:$("toast")};
+let rt=null,tt=null,notified=null;
+function key(d=new Date()){return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`}
+function fmt(d){return `${pad(d.getHours())}:${pad(d.getMinutes())}`}
+function fmin(m){if(m==null||Number.isNaN(m))return"--:--";m=Math.round(m);return `${pad(Math.floor(m/60)%24)}:${pad(((m%60)+60)%60)}`}
+function dateLabel(d){return `${d.getMonth()+1}月${d.getDate()}日 周${"日一二三四五六"[d.getDay()]}`}
+function parseTime(t,b=new Date()){let[h,m]=t.split(":").map(Number),d=new Date(b);d.setHours(h,m,0,0);return d}
+function minOf(d){return d.getHours()*60+d.getMinutes()}
+function add(d,m){return new Date(d.getTime()+m*60000)}
+function offDate(p){return add(p,WORK)}
+function punchFromOff(o){return add(o,-WORK)}
+function remain(ms){let t=Math.max(0,Math.ceil(ms/60000)),h=Math.floor(t/60),m=t%60;if(!h&&!m)return"可以下班了";if(!h)return`还有 ${m} 分钟`;return m?`还有 ${h} 小时 ${m} 分钟`:`还有 ${h} 小时`}
+function safe(k){try{return JSON.parse(localStorage.getItem(k))||{}}catch{return{}}}
+function norm(r){let o={};Object.entries(r||{}).forEach(([k,v])=>{let p=v?.punchAt||v?.time||v,d=new Date(p);if(!isNaN(d))o[k]={punchAt:d.toISOString(),source:v?.source||"migrated",createdAt:v?.createdAt||d.toISOString(),updatedAt:v?.updatedAt||d.toISOString()}});return o}
+function load(){let c=norm(safe(KEY));if(Object.keys(c).length)return c;for(let old of OLDS){let r=norm(safe(old));if(Object.keys(r).length){localStorage.setItem(KEY,JSON.stringify(r));return r}}return{}}
+function saveAll(r){localStorage.setItem(KEY,JSON.stringify(r))}
+function todayRec(){return load()[key()]||null}
+function toast(s){clearTimeout(tt);E.toast.textContent=s;E.toast.classList.add("show");tt=setTimeout(()=>E.toast.classList.remove("show"),2200)}
+function savePunch(d,source="manual"){let r=load(),k=key(d),old=r[k];r[k]={punchAt:d.toISOString(),source,createdAt:old?.createdAt||new Date().toISOString(),updatedAt:new Date().toISOString()};saveAll(r);notified=null;render();toast(`已保存，预计 ${fmt(offDate(d))} 下班`)}
+function week(){let r=load(),days=[],t=new Date();t.setHours(0,0,0,0);for(let i=6;i>=0;i--){let d=new Date(t);d.setDate(t.getDate()-i);let k=key(d),rec=r[k],pd=rec?new Date(rec.punchAt):null;days.push({date:d,rec,pd,minutes:pd?minOf(pd):null})}return days}
+function tag(m){if(m==null)return["未记","muted"];if(m<EARLY)return["偏早","warn"];if(m>LATE)return["偏晚","warn"];return["正常","ok"]}
+function renderTrend(){let data=week(),valid=data.filter(x=>x.minutes!=null),avg=valid.length?valid.reduce((s,x)=>s+x.minutes,0)/valid.length:null,min=valid.length?Math.min(...valid.map(x=>x.minutes)):null,max=valid.length?Math.max(...valid.map(x=>x.minutes)):null;E.avg.textContent=fmin(avg);E.early.textContent=fmin(min);E.late.textContent=fmin(max);E.value.textContent=valid.length?`均值 ${fmin(avg)}`:"暂无记录";E.list.innerHTML="";data.forEach(x=>{let row=document.createElement("div");row.className="trend-row";let [txt,cls]=tag(x.minutes),pct=x.minutes==null?0:Math.max(6,Math.min(100,((x.minutes-495)/(585-495))*100));row.innerHTML=`<div>${x.date.getMonth()+1}/${x.date.getDate()}</div><div class="trend-time">${x.minutes==null?"--:--":fmin(x.minutes)}</div><div class="bar-bg"><div class="bar" style="width:${pct}%"></div></div><div class="tag ${cls}">${txt}</div>`;E.list.appendChild(row)});E.trendHint.textContent=valid.length?`已统计近7天中的 ${valid.length} 天记录。`:"暂无打卡记录；之后每天打卡会自动形成趋势。";renderSpark(data)}
+function renderSpark(data){E.spark.innerHTML="";let pts=data.map((x,i)=>({...x,i})).filter(x=>x.minutes!=null);if(!pts.length){E.empty.style.display="block";E.spark.style.display="none";return}E.empty.style.display="none";E.spark.style.display="block";let min=500,max=575,y=m=>54-((Math.max(min,Math.min(max,m))-min)/(max-min))*(44)-5,arr=pts.map(p=>({x:p.i*60,y:y(p.minutes)}));if(arr.length>=2){let path=document.createElementNS("http://www.w3.org/2000/svg","path");path.setAttribute("d",arr.map((p,i)=>`${i?"L":"M"} ${p.x} ${p.y}`).join(" "));E.spark.appendChild(path)}arr.forEach(p=>{let c=document.createElementNS("http://www.w3.org/2000/svg","circle");c.setAttribute("cx",p.x);c.setAttribute("cy",p.y);c.setAttribute("r","4");E.spark.appendChild(c)})}
+function askNotify(){if(!("Notification"in window)){toast("当前浏览器不支持网页通知");return}if(Notification.permission==="granted"){toast("网页通知已开启");return}if(Notification.permission==="denied"){toast("通知已被系统拒绝，请到设置里开启");return}Notification.requestPermission().then(r=>toast(r==="granted"?"网页通知已开启":"未开启网页通知")).catch(()=>toast("未开启网页通知"))}
+function fire(o){let k=key(o);if(notified===k)return;notified=k;if("Notification"in window&&Notification.permission==="granted"){try{new Notification("到下班时间了",{body:`今天预计 ${fmt(o)} 下班。`})}catch{}}try{navigator.vibrate?.([120,60,120])}catch{}toast(`到下班时间了，今天预计 ${fmt(o)} 下班。`)}
+function schedule(o){clearTimeout(rt);let d=o-Date.now();if(d>0&&d<=2147483647)rt=setTimeout(()=>fire(o),d)}
+function setInputs(){let r=todayRec();if(r){let p=new Date(r.punchAt),o=offDate(p);E.manual.value=fmt(p);E.offInput.value=fmt(o);E.reverseHint.textContent=`当前 ${fmt(p)} 打卡，预计 ${fmt(o)} 下班。`}else{E.manual.value="08:50";E.offInput.value="17:20";E.reverseHint.textContent="例如 17:20 下班，需要 08:50 打卡。"}hint()}
+function hint(){let m=minOf(parseTime(E.manual.value));E.manualHint.textContent=m<EARLY?"这个时间早于 08:30，可以保存；请确认是否为真实打卡。":m>LATE?"这个时间晚于 09:30，可以保存；近7日趋势会标记为偏晚。":"打卡后主按钮会锁定；如需修改，只能从这里调整。"}
+function currentText(){let r=todayRec();if(!r)return"";let p=new Date(r.punchAt),o=offDate(p);return`今天 ${fmt(p)} 打卡，预计 ${fmt(o)} 下班。`}
+function icsDate(d){let z=new Date(d.getTime()-d.getTimezoneOffset()*60000);return`${z.getUTCFullYear()}${pad(z.getUTCMonth()+1)}${pad(z.getUTCDate())}T${pad(z.getUTCHours())}${pad(z.getUTCMinutes())}${pad(z.getUTCSeconds())}`}
+function esc(s){return String(s).replace(/\\/g,"\\\\").replace(/\n/g,"\\n").replace(/,/g,"\\,").replace(/;/g,"\\;")}
+function calendar(){let r=todayRec();if(!r){toast("请先打卡或补录时间");return}let p=new Date(r.punchAt),o=offDate(p),desc=`今天 ${fmt(p)} 打卡，预计 ${fmt(o)} 下班。`,ics=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Local Punch Clock//CN","CALSCALE:GREGORIAN","METHOD:PUBLISH","BEGIN:VEVENT",`UID:offwork-${key(o)}-${Date.now()}@local`,`DTSTAMP:${icsDate(new Date())}`,`DTSTART:${icsDate(o)}`,`DTEND:${icsDate(add(o,5))}`,"SUMMARY:下班时间",`DESCRIPTION:${esc(desc)}`,"BEGIN:VALARM","TRIGGER:PT0M","ACTION:DISPLAY",`DESCRIPTION:${esc(desc)}`,"END:VALARM","END:VEVENT","END:VCALENDAR"].join("\r\n");let blob=new Blob([ics],{type:"text/calendar;charset=utf-8"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=`下班提醒-${key(o)}.ics`;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);toast("已生成日历提醒文件")}
+function render(){let now=new Date(),r=todayRec();E.today.textContent=dateLabel(now);E.now.textContent=fmt(now);if(!r){E.hero.textContent="预计下班";E.off.textContent="--:--";E.punch.textContent="--:--";E.status.textContent="点击下方按钮记录今天的打卡时间";E.prog.style.width="0%";E.btn.textContent="打卡";E.btn.disabled=false;E.btn.className="primary";E.remind.disabled=true;E.copy.disabled=true;E.cal.disabled=true;E.reset.disabled=true;clearTimeout(rt);renderTrend();return}let p=new Date(r.punchAt),o=offDate(p),pct=Math.max(0,Math.min(100,((now-p)/(o-p))*100));E.hero.textContent=now>=o?"可以下班":"预计下班";E.off.textContent=fmt(o);E.punch.textContent=fmt(p);E.prog.style.width=pct+"%";E.btn.textContent="已打卡";E.btn.disabled=true;E.btn.className="locked";E.remind.disabled=false;E.copy.disabled=false;E.cal.disabled=false;E.reset.disabled=false;E.status.textContent=now>=o?`今天 ${fmt(p)} 打卡，已满 8.5 小时`:`${remain(o-now)} · 主按钮已锁定`;schedule(o);renderTrend()}
+E.btn.onclick=()=>{if(todayRec())return;savePunch(new Date(),"button");askNotify()};
+E.edit.onclick=()=>{setInputs();renderTrend();E.mask.classList.add("show")};E.close.onclick=()=>E.mask.classList.remove("show");E.mask.onclick=e=>{if(e.target===E.mask)E.mask.classList.remove("show")};
+E.manual.oninput=hint;E.save.onclick=()=>{if(!E.manual.value)return toast("请填写打卡时间");let d=parseTime(E.manual.value),r=todayRec();if(r&&fmt(new Date(r.punchAt))!==fmt(d)&&!confirm(`将今天打卡时间从 ${fmt(new Date(r.punchAt))} 改为 ${fmt(d)}？`))return;savePunch(d,"manual");setInputs()};
+E.offInput.oninput=()=>{if(!E.offInput.value)return;let o=parseTime(E.offInput.value),p=punchFromOff(o);E.reverseHint.textContent=`${fmt(o)} 下班，需要 ${fmt(p)} 打卡。`};
+E.reverse.onclick=()=>{if(!E.offInput.value)return toast("请填写目标下班时间");let o=parseTime(E.offInput.value),p=punchFromOff(o),r=todayRec();E.manual.value=fmt(p);hint();E.reverseHint.textContent=`${fmt(o)} 下班，需要 ${fmt(p)} 打卡。`;if(r&&fmt(new Date(r.punchAt))!==fmt(p)&&!confirm(`将今天打卡时间从 ${fmt(new Date(r.punchAt))} 改为 ${fmt(p)}？`))return;savePunch(p,"reverse")};
+E.remind.onclick=calendar;E.cal.onclick=calendar;E.notify.onclick=askNotify;E.copy.onclick=async()=>{let t=currentText();if(!t)return;try{await navigator.clipboard.writeText(t);toast("已复制")}catch{toast(t)}};E.reset.onclick=()=>{let r=load(),k=key();if(!r[k])return;if(!confirm("重置今天的打卡记录？"))return;delete r[k];saveAll(r);notified=null;render();setInputs();toast("已重置")};
+if("serviceWorker"in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));render();setInterval(render,15000);document.addEventListener("visibilitychange",render);
+})();
+</script>
 </body>
 </html>
